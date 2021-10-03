@@ -3,6 +3,11 @@
 // https://www.pololu.com/docs/0J73/15.6
 // and modified for my needs.
 
+// gcc -m64 serialtest.c -O3 -Wall -oserialtest.exe
+// strip serialtest.exe
+
+// Frank B, 10/2021
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -13,9 +18,9 @@ void print_error(const char * context)
   DWORD error_code = GetLastError();
   char buffer[256];
   DWORD size = FormatMessageA(
-                 FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_MAX_WIDTH_MASK,
-                 NULL, error_code, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-                 buffer, sizeof(buffer), NULL);
+    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_MAX_WIDTH_MASK,
+    NULL, error_code, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+    buffer, sizeof(buffer), NULL);
   if (size == 0) { buffer[0] = 0; }
   fprintf(stderr, "%s: %s\n", context, buffer);
 }
@@ -25,7 +30,7 @@ void print_error(const char * context)
 HANDLE open_serial_port(const char * device, uint32_t baud_rate)
 {
   HANDLE port = CreateFileA(device, GENERIC_READ | GENERIC_WRITE, 0, NULL,
-                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (port == INVALID_HANDLE_VALUE)
   {
     print_error(device);
@@ -48,7 +53,8 @@ HANDLE open_serial_port(const char * device, uint32_t baud_rate)
   timeouts.ReadTotalTimeoutMultiplier = 0;
   timeouts.WriteTotalTimeoutConstant = 100;
   timeouts.WriteTotalTimeoutMultiplier = 0;
-
+ 
+  
   success = SetCommTimeouts(port, &timeouts);
   if (!success)
   {
@@ -122,10 +128,10 @@ int main(int argc, char **argv)
 
   if ( argc != 2 || strlen(argv[1]) < 4 ||
        argv[1][0] != 'C' || argv[1][1] != 'O' || argv[1][2] != 'M' ||
-       (argv[1][3] < '1' || argv[1][3] > '9')) {
+      (argv[1][3] < '1' || argv[1][3] > '9')) {
 
-    fprintf(stderr, "Usage: %s COMx\n", argv[0]);
-    return 1;
+      fprintf(stderr, "Usage: %s COMx\n", argv[0]);
+      return 1;
   }
   pnum = strtol(&argv[1][3], NULL, 10);
 
@@ -157,11 +163,10 @@ int main(int argc, char **argv)
   do {
     r = read_port(port, buf, 1);
     //if (r) printf("%c", buf[0]);
-  } while (  r < 1 || buf[0] != '\n' );
+  } while(  r < 1 || buf[0] != '\n' );
 
   printf("Start.\n");
-  unsigned int gCnt = 0;
-  unsigned int zCnt = 0;
+
   do {
 
     r = read_port(port, buf, sizeof buf);
@@ -173,22 +178,8 @@ int main(int argc, char **argv)
       }
       if (ch == '\n') {
         line[lcnt] = '\0';
-        if (lcnt != 64 || '1' != line[0] || 'z' != line[30] ) {
-          if ( lines == 100000) {
-            printf( "." );
-            if ( !( gCnt % 50) )
-              printf("\nLines-Delta: %d. Received: %s", lines, line);
-            gCnt++;
-          }
-          else {
-            if ( 0 != zCnt ) {
-              printf("\nLines-Delta: %d. Received: %s", lines, line);
-            }
-            else {
-              printf( "._X" );
-            }
-            zCnt = lines;
-          }
+        if (lcnt != 10) {
+          printf("Lines-Delta: %d. String: %s", lines, line);
           lines = 0;
         }
         else lines++;
@@ -196,7 +187,7 @@ int main(int argc, char **argv)
       }
     }
 
-  } while (1);
+  } while(1);
 
 
   CloseHandle(port);
