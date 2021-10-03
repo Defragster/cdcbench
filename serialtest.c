@@ -135,8 +135,8 @@ int main(int argc, char **argv)
   }
   pnum = strtol(&argv[1][3], NULL, 10);
 
-  if (pnum > 9) snprintf(device, sizeof device, "\\\\.\\COM%d", pnum);
-  else snprintf(device, sizeof device, "COM%d", pnum);
+  if (pnum > 9) snprintf(device, sizeof device, "\\\\.\\COM%ld", pnum);
+  else snprintf(device, sizeof device, "COM%ld", pnum);
 
   printf("Port: %s\n", device);
 
