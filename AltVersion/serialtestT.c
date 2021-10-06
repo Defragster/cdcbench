@@ -167,9 +167,10 @@ int main(int argc, char **argv)
   unsigned int lcnt = 0;
 
   SSIZE_T r;
+  SSIZE_T rmax=0;
 
   char line[256];
-  char buf[1000000];
+  char buf[2000000];
 
   memset(buf, 0, sizeof buf);
   memset(line, 0, sizeof line);
@@ -180,20 +181,23 @@ int main(int argc, char **argv)
   } while(  r < 1 || buf[0] != '\n' );
 
   printf("Start.\n");
-  uint8_t Hello[] = "Hello World - from serialTest\n";
+  uint8_t Hello[] = "Hello World - from serialTest\n";  // this message could tell Teensy how many "SZ" bytes to send
   write_port(port, Hello, sizeof(Hello) );
 
   unsigned int gCnt = 0;
   unsigned int zCnt = 1;
+  unsigned long bcnt=0;
   long unsigned int stats[3] = {0,0,0};
   do {
 
     r = read_port(port, buf, sizeof buf);
+    if ( r > rmax ) rmax = r;
     pos = 0;
     while (r-- && pos < sizeof buf) {
       char ch = buf[pos++];
       if (lcnt < sizeof line) {
         line[lcnt++] = ch;
+        bcnt++; // count bytes parsed
       }
       if (ch == '\n') {
         line[lcnt] = '\0';
@@ -203,21 +207,29 @@ int main(int argc, char **argv)
             printf( "." );
             if ( !( gCnt % 50) )
               printf("\nLines-Delta: %d. Received: %s", lines, line);
-            if ( !( gCnt % 2000) ) {
-              printf( "\tstats: 100K=%lu less=%lu repeated %lu\n", stats[0], stats[1], stats[2] );
+            if ( !( gCnt % 200) ) {
+              printf( "\tstats: 100K=%lu less=%lu repeated %lu rmax=%I64d\n", stats[0], stats[1], stats[2], rmax );
+              rmax=0;
             }
             gCnt++;
           }
           else {
             if ( 0 != zCnt ) {
-              printf("\nX_Lines-Delta: %d. Received: %s", lines, line);
+              printf("\nX_Lines-Delta: %d. Received: %s bytes: %lu", lines, line, bcnt);
               if ( 0!= stats[0] )
                 stats[1]++;
             }
             else {
               if ( 0!= stats[0] )
                 stats[2]++;
-              printf( ".X_" );
+              printf( ".X_%lu", bcnt );
+              SSIZE_T rr=0;
+              do {
+                r = read_port(port, buf, sizeof buf);
+                rr+=r;
+              } while ( r >1800000 );
+              printf( "\tBufdump of %I64u\n", rr );
+              lines++; // stop cascade
             }
             zCnt = lines;
           }
@@ -225,6 +237,7 @@ int main(int argc, char **argv)
         }
         else lines++;
         lcnt = 0;
+        bcnt = 0;
       }
     }
 
