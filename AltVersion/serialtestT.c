@@ -186,6 +186,7 @@ int main(int argc, char **argv)
 
   unsigned int gCnt = 0;
   unsigned int zCnt = 1;
+  unsigned int qck = 1;
   unsigned long bcnt=0;
   long unsigned int stats[3] = {0,0,0};
   do {
@@ -201,7 +202,10 @@ int main(int argc, char **argv)
       }
       if (ch == '\n') {
         line[lcnt] = '\0';
-        if (lcnt != scnt || '1' != line[0] || 'z' != line[30] ) {
+        if ( qck==1 && lcnt != scnt ) {
+          printf("%s", line);
+        }
+        else if (lcnt != scnt || '1' != line[0] || 'z' != line[30] ) {
           if ( lines == 100000) {
             stats[0]++;
             printf( "." );
