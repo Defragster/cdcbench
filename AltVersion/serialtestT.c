@@ -134,6 +134,7 @@ int main(int argc, char **argv)
   char device[16];
   long pnum;
   long scnt=63;
+  int qck = 0;
 
   if ( argc < 2 || strlen(argv[1]) < 4 ||
        argv[1][0] != 'C' || argv[1][1] != 'O' || argv[1][2] != 'M' ||
@@ -150,6 +151,9 @@ int main(int argc, char **argv)
   if ( argc >= 3 && argv[2][0] == 'S' && argv[2][1] == 'Z' ) {
     scnt = strtol(&argv[2][2], NULL, 10);
     if ( scnt < 1 ) scnt=63;
+  }
+  if ( argc >= 4 && argv[3][0] == 'Q' ) {
+    qck =1;
   }
 
   printf("Port: %s\n", device);
@@ -186,7 +190,6 @@ int main(int argc, char **argv)
 
   unsigned int gCnt = 0;
   unsigned int zCnt = 1;
-  unsigned int qck = 1;
   unsigned long bcnt=0;
   long unsigned int stats[3] = {0,0,0};
   do {
