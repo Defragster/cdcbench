@@ -5,12 +5,23 @@
 const int n = 100000;
 volatile uint32_t t;
 
+char tbuf[256];
+int idx;
+int szSize;
+uint32_t count1;
 void setup() {
   Serial.begin(9600);
-  //while (!Serial);
+  // while (!Serial);
+  count1 = 1;
+  szSize = sprintf( tbuf, "%8lX0<<<>>>___[[[]]]---{{{}}}___!\n", count1 );  // USE SAME STRING below in loop()
+  count1 = 0;
+  //    Serial.print( szSize );
+  for ( idx = 0; tbuf[idx] != 0; idx++ );
+  //    Serial.print( idx );
+  for ( idx = 0; tbuf[idx] != '0'; idx++ ); // FIRST ZERO in tbuf is unroll digit
+  //  Serial.print( idx );
   delay(1000);
 }
-
 
 uint32_t count = 0;
 uint32_t lpsSum[50];
@@ -52,18 +63,48 @@ void logEvent( int uu ) {
   SerialUSB1.println(lpsSum[49]);
 #endif
 }
-//char szTest[] = "13579abcdefghijklmnopqrstuvwxyz02468ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"; // sz63
-//char szTest[] = "13579abcdefghijklmnopqrstuvwxyz0\n"; //SZ33
-char szTest[] = "13579abcdefghijklmnopqrstuvwxyz\n"; //SZ32 
-int szSize = sizeof(szTest);
+
 void loop() {
   t = micros();
-  for (int i = 1; i < n + 1; i++) {
-    Serial.print(szTest);
+  for (int i = 1; i < n + 1; i += 16) {
+    sprintf( tbuf, "%8lX0<<<>>>___[[[]]]---{{{}}}___!\n", count1 );
+    Serial.print( tbuf );
+    tbuf[idx] = '1';
+    Serial.print( tbuf );
+    tbuf[idx] = '2';
+    Serial.print( tbuf );
+    tbuf[idx] = '3';
+    Serial.print( tbuf );
+    tbuf[idx] = '4';
+    Serial.print( tbuf );
+    tbuf[idx] = '5';
+    Serial.print( tbuf );
+    tbuf[idx] = '6';
+    Serial.print( tbuf );
+    tbuf[idx] = '7';
+    Serial.print( tbuf );
+    tbuf[idx] = '8';
+    Serial.print( tbuf );
+    tbuf[idx] = '9';
+    Serial.print( tbuf );
+    tbuf[idx] = 'A';
+    Serial.print( tbuf );
+    tbuf[idx] = 'B';
+    Serial.print( tbuf );
+    tbuf[idx] = 'C';
+    Serial.print( tbuf );
+    tbuf[idx] = 'D';
+    Serial.print( tbuf );
+    tbuf[idx] = 'E';
+    Serial.print( tbuf );
+    tbuf[idx] = 'F';
+    Serial.print( tbuf );
+    //delayNanoseconds( 24000 );
+    count1++;
   }
   t = micros() - t;
   count++;
-  Serial.printf("%d Bytes in %d us = %0.2f Megabits per second\n", n * szSize, t, (double)n * szSize * 8 / t);
+  Serial.printf("%d Bytes in %d us = %0.2f Mbps\n", n * szSize, t, (double)n * szSize * 8 / t);
   int idx = (n * szSize * 8 / t) / 10;
   if ( idx > 49 ) idx = 49;
   lpsSum[ idx ]++;
