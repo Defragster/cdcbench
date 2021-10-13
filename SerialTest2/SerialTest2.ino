@@ -2,28 +2,29 @@
 //Check if the line numbers fit.
 //Windows: There is a memory bug in the USB CDC driver, so you'll probably see strange results.
 
-const int n = 100000;
+#define FILL_STRING "<<<>>>___[[[]]]---{{{}}}___!\n"
+
+const int n = 100096;
 volatile uint32_t t;
 
 char tbuf[256];
 int idx;
 int szSize;
-uint32_t count1;
+uint32_t count;
 void setup() {
   Serial.begin(9600);
   // while (!Serial);
-  count1 = 1;
-  szSize = sprintf( tbuf, "%8lX0<<<>>>___[[[]]]---{{{}}}___!\n", count1 );  // USE SAME STRING below in loop()
-  count1 = 0;
+  count = 1;
+  szSize = sprintf( tbuf, "%8lX0" FILL_STRING, count );  // USE SAME STRING below in loop()
+  count = 0;
   //    Serial.print( szSize );
   for ( idx = 0; tbuf[idx] != 0; idx++ );
   //    Serial.print( idx );
-  for ( idx = 0; tbuf[idx] != '0'; idx++ ); // FIRST ZERO in tbuf is unroll digit
-  //  Serial.print( idx );
+  for ( idx = 0; tbuf[idx] != '1'; idx++ ); // FIRST ONE in tbuf is unroll digit
+    Serial.print( idx );
   delay(1000);
 }
 
-uint32_t count = 0;
 uint32_t lpsSum[50];
 void serialEvent() {
   logEvent( 1 );
@@ -64,46 +65,51 @@ void logEvent( int uu ) {
 #endif
 }
 
+char boo[]={'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
 void loop() {
   t = micros();
-  for (int i = 1; i < n + 1; i += 16) {
-    sprintf( tbuf, "%8lX0<<<>>>___[[[]]]---{{{}}}___!\n", count1 );
-    Serial.print( tbuf );
-    tbuf[idx] = '1';
-    Serial.print( tbuf );
-    tbuf[idx] = '2';
-    Serial.print( tbuf );
-    tbuf[idx] = '3';
-    Serial.print( tbuf );
-    tbuf[idx] = '4';
-    Serial.print( tbuf );
-    tbuf[idx] = '5';
-    Serial.print( tbuf );
-    tbuf[idx] = '6';
-    Serial.print( tbuf );
-    tbuf[idx] = '7';
-    Serial.print( tbuf );
-    tbuf[idx] = '8';
-    Serial.print( tbuf );
-    tbuf[idx] = '9';
-    Serial.print( tbuf );
-    tbuf[idx] = 'A';
-    Serial.print( tbuf );
-    tbuf[idx] = 'B';
-    Serial.print( tbuf );
-    tbuf[idx] = 'C';
-    Serial.print( tbuf );
-    tbuf[idx] = 'D';
-    Serial.print( tbuf );
-    tbuf[idx] = 'E';
-    Serial.print( tbuf );
-    tbuf[idx] = 'F';
-    Serial.print( tbuf );
-    //delayNanoseconds( 24000 );
-    count1++;
+  char *ptbuf = &tbuf[idx+1];
+  for (int i = 1; i < n + 1; i += 256) {
+    sprintf( tbuf, "%8lX0" FILL_STRING, count );
+    for (int ii = 0; ii < 16; ii++ ) {
+      tbuf[idx] = boo[ii];
+      *ptbuf = '0';
+      Serial.print( tbuf );
+      *ptbuf = '1';
+      Serial.print( tbuf );
+      *ptbuf = '2';
+      Serial.print( tbuf );
+      *ptbuf = '3';
+      Serial.print( tbuf );
+      *ptbuf = '4';
+      Serial.print( tbuf );
+      *ptbuf = '5';
+      Serial.print( tbuf );
+      *ptbuf = '6';
+      Serial.print( tbuf );
+      *ptbuf = '7';
+      Serial.print( tbuf );
+      *ptbuf = '8';
+      Serial.print( tbuf );
+      *ptbuf = '9';
+      Serial.print( tbuf );
+      *ptbuf = 'A';
+      Serial.print( tbuf );
+      *ptbuf = 'B';
+      Serial.print( tbuf );
+      *ptbuf = 'C';
+      Serial.print( tbuf );
+      *ptbuf = 'D';
+      Serial.print( tbuf );
+      *ptbuf = 'E';
+      Serial.print( tbuf );
+      *ptbuf = 'F';
+      Serial.print( tbuf );
+      //delayNanoseconds( 24000 );
+      count++;
+    }
   }
   t = micros() - t;
-  count++;
   Serial.printf("%d Bytes in %d us = %0.2f Mbps\n", n * szSize, t, (double)n * szSize * 8 / t);
   int idx = (n * szSize * 8 / t) / 10;
   if ( idx > 49 ) idx = 49;
