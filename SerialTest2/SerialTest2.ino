@@ -25,7 +25,7 @@ void setup() {
   delay(1000);
 }
 
-uint32_t lpsSum[50];
+uint32_t lpsSum[200];
 void serialEvent() {
   logEvent( 1 );
 }
@@ -50,7 +50,7 @@ void logEvent( int uu ) {
   SerialUSB1.println(millis() / 1000.0);
   SerialUSB1.print(" >> Call by USB==1 or USB1==2 :: ");
   SerialUSB1.println(uu);
-  for ( int ii = 0; ii < 49; ii++ ) {
+  for ( int ii = 0; ii < 199; ii++ ) {
     if ( lpsSum[ii] > 0 ) {
       SerialUSB1.print("Mb/sec ");
       SerialUSB1.print((ii) * 10);
@@ -61,12 +61,13 @@ void logEvent( int uu ) {
     }
   }
   SerialUSB1.print("Bogus Speed calcs = ");
-  SerialUSB1.println(lpsSum[49]);
+  SerialUSB1.println(lpsSum[199]);
 #endif
 }
 
 char boo[]={'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
 void loop() {
+  double ihold;
   t = micros();
   char *ptbuf = &tbuf[idx+1];
   for (int i = 1; i < n + 1; i += 256) {
@@ -110,9 +111,10 @@ void loop() {
     }
   }
   t = micros() - t;
-  Serial.printf("%d Bytes in %d us = %0.2f Mbps\n", n * szSize, t, (double)n * szSize * 8 / t);
-  int idx = (n * szSize * 8 / t) / 10;
-  if ( idx > 49 ) idx = 49;
+  ihold = (double)(n*8) * szSize / t;
+  Serial.printf("%d Bytes in %d us = %0.2f Mbps\n", n * szSize, t, ihold);
+  int idx = ihold/10;
+  if ( idx > 199 ) idx = 199;
   lpsSum[ idx ]++;
   //delay(10);
 }
