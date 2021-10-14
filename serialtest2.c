@@ -125,7 +125,7 @@ SSIZE_T read_port(HANDLE port, char * buffer, size_t size)
   return received;
 }
 
-
+#define DEFAULT_LINE_LEN  38  // Expected default line length
 int main(int argc, char **argv)
 {
   // COM ports higher than COM9 need the \\.\ prefix, which is written as
@@ -133,14 +133,14 @@ int main(int argc, char **argv)
 
   char device[16];
   long pnum;
-  long scnt = 63;
+  long scnt = DEFAULT_LINE_LEN;
   int qck = 0;
 
   if ( argc < 2 || strlen(argv[1]) < 4 ||
        argv[1][0] != 'C' || argv[1][1] != 'O' || argv[1][2] != 'M' ||
        (argv[1][3] < '1' || argv[1][3] > '9')) {
 
-    fprintf(stderr, "Usage: %s COMx [SZx] \n", argv[0]);
+    fprintf(stderr, "Usage: %s COMx [SZx] [Q] \n", argv[0]);
     return 1;
   }
   pnum = strtol(&argv[1][3], NULL, 10);
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 
   if ( argc >= 3 && argv[2][0] == 'S' && argv[2][1] == 'Z' ) {
     scnt = strtol(&argv[2][2], NULL, 10);
-    if ( scnt < 1 ) scnt = 63;
+    if ( scnt < 1 ) scnt = DEFAULT_LINE_LEN;
   }
   if ( argc >= 4 && argv[3][0] == 'Q' ) {
     qck = 1;
